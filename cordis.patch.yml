@@ -1,0 +1,3 @@
+- insert:
+    - id: codex-relay-monitor
+      name: '@local/codex-relay-monitor'

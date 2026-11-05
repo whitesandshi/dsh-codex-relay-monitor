@@ -1,0 +1,29 @@
+{
+  "name": "@local/codex-relay-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Floating status window for the Codex relay and desktop logs.",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "widget.ps1",
+    "launch-widget.vbs",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}

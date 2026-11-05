@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codex 链路监控",
+    "description": "在右下角悬浮显示 Codex 的过载重试、断流重连与当前请求状态，数据来自 codex-overload-fix 的 relay 日志和 Codex 桌面日志。"
+  }
+}

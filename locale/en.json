@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codex Link Monitor",
+    "description": "A floating card that shows Codex overload retries, dropped-stream reconnects, and the current request, read from the codex-overload-fix relay log and the Codex desktop logs."
+  }
+}
