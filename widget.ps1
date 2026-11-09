@@ -62,7 +62,7 @@ $close.Foreground = Brush '#9AA0A6'
 $close.BorderThickness = New-Object System.Windows.Thickness 0
 $close.Cursor = [System.Windows.Input.Cursors]::Hand
 $close.Add_Click({ $window.Close() })
-$close.Add_PreviewMouseLeftButtonDown({ param($s, $e) $e.Handled = $true })
+# (no preview filter here: marking the press handled stops ButtonBase from ever raising Click)
 [System.Windows.Controls.DockPanel]::SetDock($close, [System.Windows.Controls.Dock]::Right)
 $header.Children.Add($close) | Out-Null
 
@@ -110,7 +110,22 @@ $footer = New-Line 10.5 '#6E7681'
 $footer.Text = ''
 $panel.Children.Add($footer) | Out-Null
 
-$root.Add_MouseLeftButtonDown({ try { $window.DragMove() } catch { } })
+function Test-InsideButton($element) {
+  $node = $element
+  while ($node -ne $null) {
+    if ($node -is [System.Windows.Controls.Button]) { return $true }
+    try { $node = [System.Windows.Media.VisualTreeHelper]::GetParent($node) } catch { return $false }
+  }
+  return $false
+}
+
+$root.Add_MouseLeftButtonDown({
+  param($sender, $eventArgs)
+  try {
+    if (Test-InsideButton $eventArgs.OriginalSource) { return }
+    $window.DragMove()
+  } catch { }
+})
 
 function Format-When($value) {
   try { return [System.DateTimeOffset]::FromUnixTimeMilliseconds([int64]$value).LocalDateTime.ToString('HH:mm:ss') } catch { return '--:--:--' }
