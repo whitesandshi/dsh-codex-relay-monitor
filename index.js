@@ -9,7 +9,7 @@
  *
  * The Client half (client.js) polls `/codex-relay/status` and draws the window.
  */
-import { promises as fsp, readFileSync, rmSync } from 'node:fs'
+import { promises as fsp, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { spawn, spawnSync } from 'node:child_process'
 import { createConnection } from 'node:net'
 import { homedir, tmpdir } from 'node:os'
@@ -21,6 +21,7 @@ export const inject = ['webServer']
 const WIDGET_DIR = dirname(fileURLToPath(import.meta.url))
 const WIDGET_LAUNCHER = join(WIDGET_DIR, 'launch-widget.vbs')
 const WIDGET_PID_FILE = join(tmpdir(), 'codex-relay-widget.pid')
+const WIDGET_URL_FILE = join(tmpdir(), 'codex-relay-widget.url')
 
 const MAX_EVENTS = 80
 const WINDOW_MS = 5 * 60 * 1000
@@ -141,10 +142,15 @@ function stopWidget() {
   }
 }
 
-function startWidget() {
+function startWidget(statusUrl) {
   if (process.platform !== 'win32') return
   stopWidget()
   try {
+    // The Harness picks a fresh port on every start, so the widget must not
+    // hard-code one: hand it the endpoint this process is actually serving.
+    if (typeof statusUrl === 'string' && statusUrl !== '') {
+      writeFileSync(WIDGET_URL_FILE, statusUrl, 'utf8')
+    }
     const child = spawn('wscript.exe', [WIDGET_LAUNCHER], {
       detached: true,
       stdio: 'ignore',
@@ -461,8 +467,18 @@ export function apply(ctx, config) {  const options = resolveOptions(config)
   // The floating window lives outside the Harness window, so it is a separate
   // always-on-top process fed by the same `/codex-relay/status` endpoint.
   if (config?.widget !== false) {
+    const statusEndpoint = () => {
+      try {
+        const origin = ctx.webServer.getOrigin()
+        if (origin) return `${origin}/codex-relay/status`
+      } catch {
+        /* the listener has not bound yet */
+      }
+      const port = ctx.webServer.port
+      return port ? `http://127.0.0.1:${port}/codex-relay/status` : ''
+    }
     ctx.effect(() => {
-      startWidget()
+      startWidget(statusEndpoint())
       return () => stopWidget()
     }, 'codex-relay.widget')
   }

@@ -1,9 +1,18 @@
-﻿$ErrorActionPreference = 'Stop'
+﻿param([string]$StatusUri = '')
+
+$ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
 
-$statusUri = 'http://127.0.0.1:7297/codex-relay/status'
+# The Harness port changes between starts, so the Host writes the current
+# endpoint to this file before launching the widget.
+if (-not $StatusUri) {
+  $uriFile = Join-Path $env:TEMP 'codex-relay-widget.url'
+  if (Test-Path $uriFile) { $StatusUri = (Get-Content -Path $uriFile -Raw).Trim() }
+}
+if (-not $StatusUri) { $StatusUri = 'http://127.0.0.1:7297/codex-relay/status' }
+$statusUri = $StatusUri
 $pidFile = Join-Path $env:TEMP 'codex-relay-widget.pid'
 Set-Content -Path $pidFile -Value $PID -Encoding ascii
 

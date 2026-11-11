@@ -30,6 +30,7 @@ Codex ──> 127.0.0.1:8787 relay ──> 上游
 - **Host 半身**（`index.js`）：增量 tail `relay.log` 和 Codex 桌面日志，维护每个请求的状态，注册 `GET /codex-relay/status` 返回 JSON 快照。
 - **Client 半身**（`client.js`）：空实现。界面不在 Harness 页面里，避免遮挡对话。
 - **小窗**（`widget.ps1` + `launch-widget.vbs`）：WPF 置顶窗口，每 2 秒拉一次接口；拖动标题区移动，右上角 `×` 关闭。插件启用时启动，停用/退出时按 PID 关掉。
+  监听端口每次启动都可能变，插件会把当前地址写进 `%TEMP%\codex-relay-widget.url`，小窗启动时读它，不写死端口。
 
 ## 安装
 
